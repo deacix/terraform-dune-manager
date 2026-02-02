@@ -36,7 +36,7 @@ variable "team" {
 # -----------------------------------------------------------------------------
 
 module "dune" {
-  source = "../../modules/dune"
+  source = "../../"
 
   # Required
   team         = var.team

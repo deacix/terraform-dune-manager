@@ -12,7 +12,9 @@ on:
       - main
       - develop
     paths:
-      - 'modules/**'
+      - '*.tf'
+      - 'scripts/**'
+      - 'tests/**'
       - 'examples/**'
       - '.github/workflows/test.yml'
   pull_request:
@@ -20,7 +22,9 @@ on:
       - main
       - develop
     paths:
-      - 'modules/**'
+      - '*.tf'
+      - 'scripts/**'
+      - 'tests/**'
       - 'examples/**'
       - '.github/workflows/test.yml'
 
@@ -55,7 +59,7 @@ jobs:
     strategy:
       matrix:
         directory:
-          - modules/dune
+          - .
           - examples/simple
     steps:
       - name: Checkout
@@ -97,11 +101,9 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: modules/dune
 
       - name: Run Tests
         run: terraform test -verbose
-        working-directory: modules/dune
 
   # ---------------------------------------------------------------------------
   # Security Scan
@@ -131,5 +133,4 @@ jobs:
       - name: Check README exists
         run: |
           test -f README.md
-          test -f modules/dune/README.md
           test -f examples/simple/README.md

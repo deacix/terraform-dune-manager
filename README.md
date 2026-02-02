@@ -1,30 +1,30 @@
-# Terraform Infrastructure
+# Dune Terraform Module
 
-Terraform-based infrastructure-as-code for managing Dune Analytics resources.
+[![Terraform Registry](https://img.shields.io/badge/Terraform-Registry-purple.svg)](https://registry.terraform.io/modules/deacix/manager/dune/latest)
+[![Test](https://github.com/deacix/terraform-dune-manager/actions/workflows/test.yml/badge.svg)](https://github.com/deacix/terraform-dune-manager/actions/workflows/test.yml)
+[![Release](https://github.com/deacix/terraform-dune-manager/actions/workflows/release.yml/badge.svg)](https://github.com/deacix/terraform-dune-manager/actions/workflows/release.yml)
+
+Terraform module for managing Dune Analytics queries and materialized views.
 
 ## Overview
 
-This directory contains a custom Terraform module for managing Dune Analytics queries and materialized views. Since there's no official Dune Terraform provider, the module uses the REST API directly via shell scripts.
+This module provides infrastructure-as-code for Dune Analytics resources. Since there's no official Dune Terraform provider, the module uses the REST API directly via shell scripts.
 
 ## Structure
 
 ```
-terraform/
-├── README.md              # This file
+terraform-dune-manager/
+├── main.tf                # Main resource definitions
+├── variables.tf           # Input variables
+├── outputs.tf             # Output definitions
+├── locals.tf              # Local computed values
+├── versions.tf            # Provider version constraints
+├── scripts/               # API helper scripts
+├── tests/                 # Terraform native tests
+├── examples/
+│   └── simple/            # Simple standalone example
 ├── Makefile               # Convenience commands
-├── .gitignore             # Terraform-specific ignores
-├── modules/
-│   └── dune/              # Dune Analytics module
-│       ├── README.md      # Module documentation
-│       ├── main.tf        # Main resource definitions
-│       ├── variables.tf   # Input variables
-│       ├── outputs.tf     # Output definitions
-│       ├── locals.tf      # Local computed values
-│       ├── versions.tf    # Provider version constraints
-│       ├── scripts/       # API helper scripts
-│       └── tests/         # Terraform native tests
-└── examples/
-    └── simple/            # Simple standalone example
+└── README.md              # This file
 ```
 
 ## Quick Start
@@ -60,7 +60,7 @@ make apply
 
 ## Module Features
 
-The Dune module (`modules/dune/`) provides:
+This module provides:
 
 ### Query Management
 - Create, update, and archive queries
@@ -80,13 +80,16 @@ The Dune module (`modules/dune/`) provides:
 
 ## Usage Example
 
-```hcl
-module "dune_dashboard" {
-  source = "./modules/dune"
+### From Terraform Registry
 
-  team         = "1inch"
+```hcl
+module "dune" {
+  source  = "deacix/manager/dune"
+  version = "~> 1.0"
+
+  team         = "my-team"
   dune_api_key = var.dune_api_key
-  query_prefix = "[1inch Dashboard]"
+  query_prefix = "[Dashboard]"
   is_private   = true
 
   queries = {
@@ -112,6 +115,18 @@ module "dune_dashboard" {
   enable_usage_monitoring   = true
   enable_dataset_discovery  = true
   enable_matview_discovery  = true
+}
+```
+
+### From GitHub
+
+```hcl
+module "dune" {
+  source = "github.com/deacix/terraform-dune-manager?ref=v1.0.0"
+
+  team         = "my-team"
+  dune_api_key = var.dune_api_key
+  # ...
 }
 ```
 
@@ -184,7 +199,7 @@ The module includes comprehensive tests using Terraform's native testing framewo
 make test
 
 # Run tests directly
-cd modules/dune && terraform test
+terraform test
 ```
 
 ### Test Coverage
@@ -302,18 +317,9 @@ git commit -m "fix: critical bug in query creation"
 git push -u origin hotfix/critical-fix
 ```
 
-### Status Badges
-
-Add these badges to your fork:
-
-```markdown
-![Test](https://github.com/YOUR_ORG/dune.terraform/actions/workflows/test.yml/badge.svg)
-![Release](https://github.com/YOUR_ORG/dune.terraform/actions/workflows/release.yml/badge.svg)
-```
-
 ## Related Documentation
 
-- [Dune Module README](modules/dune/README.md)
+- [Terraform Registry](https://registry.terraform.io/modules/deacix/manager/dune/latest)
 - [Simple Example](examples/simple/README.md)
 - [Dune API Reference](https://docs.dune.com/api-reference)
 - [Terraform Module Development](https://developer.hashicorp.com/terraform/language/modules/develop)

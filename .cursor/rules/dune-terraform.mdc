@@ -1,5 +1,5 @@
 ---
-globs: infra/terraform/**/*
+globs: "**/*"
 alwaysApply: true
 ---
 
@@ -107,7 +107,7 @@ SELECT ...
 ### Module Structure
 
 ```
-infra/terraform/modules/dune/
+terraform-dune-manager/
 ├── main.tf           # Resource definitions (queries, mat views)
 ├── variables.tf      # Input variables with validation
 ├── outputs.tf        # Output values (query_ids, URLs, etc.)
@@ -120,10 +120,12 @@ infra/terraform/modules/dune/
 │   ├── archive_query.sh
 │   ├── create_matview.sh
 │   └── refresh_matview.sh
-└── tests/            # Terraform native tests
-    ├── unit.tftest.hcl
-    ├── validation.tftest.hcl
-    └── outputs.tftest.hcl
+├── tests/            # Terraform native tests
+│   ├── unit.tftest.hcl
+│   ├── validation.tftest.hcl
+│   └── outputs.tftest.hcl
+└── examples/         # Usage examples
+    └── simple/
 ```
 
 ### Key Resources
@@ -190,9 +192,11 @@ materialized_views = {
 Run module tests:
 
 ```bash
-cd infra/terraform/modules/dune
 terraform init
 terraform test
+
+# Or use Makefile
+make test
 ```
 
 Tests use mocks to avoid real API calls. Test categories:
@@ -225,8 +229,8 @@ Tests use mocks to avoid real API calls. Test categories:
 
 ## Related Documentation
 
+- [Terraform Registry](https://registry.terraform.io/modules/deacix/manager/dune/latest)
 - [Dune API Reference](https://docs.dune.com/api-reference/overview/introduction)
 - [DuneSQL Query Engine](https://docs.dune.com/query-engine/overview)
 - [Materialized Views](https://docs.dune.com/query-engine/materialized-views)
 - [Terraform Testing](https://developer.hashicorp.com/terraform/language/tests)
-- [Project Dune Rules](../../../.cursor/rules/dune-api.mdc)

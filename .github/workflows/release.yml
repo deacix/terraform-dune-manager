@@ -57,17 +57,14 @@ jobs:
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
 
-      - name: Terraform Init (Module)
+      - name: Terraform Init
         run: terraform init
-        working-directory: modules/dune
 
-      - name: Terraform Validate (Module)
+      - name: Terraform Validate
         run: terraform validate
-        working-directory: modules/dune
 
       - name: Run Tests
         run: terraform test -verbose
-        working-directory: modules/dune
 
   # ---------------------------------------------------------------------------
   # Create Release (on merge to main)
@@ -183,7 +180,6 @@ jobs:
 
       - name: Final Validation
         run: |
-          cd modules/dune
           terraform init
           terraform validate
           terraform test
@@ -194,10 +190,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Module released successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Usage" >> $GITHUB_STEP_SUMMARY
+          echo "### Usage (Terraform Registry)" >> $GITHUB_STEP_SUMMARY
           echo '```hcl' >> $GITHUB_STEP_SUMMARY
           echo 'module "dune" {' >> $GITHUB_STEP_SUMMARY
-          echo '  source = "github.com/${{ github.repository }}//modules/dune?ref=${{ github.ref_name }}"' >> $GITHUB_STEP_SUMMARY
+          echo '  source  = "deacix/manager/dune"' >> $GITHUB_STEP_SUMMARY
+          echo '  version = "${{ github.ref_name }}"' >> $GITHUB_STEP_SUMMARY
           echo '' >> $GITHUB_STEP_SUMMARY
           echo '  team         = "your-team"' >> $GITHUB_STEP_SUMMARY
           echo '  dune_api_key = var.dune_api_key' >> $GITHUB_STEP_SUMMARY

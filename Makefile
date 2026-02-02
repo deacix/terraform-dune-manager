@@ -96,7 +96,7 @@ state:
 # Run module tests
 test:
 	@echo "Running Terraform tests..."
-	cd modules/dune && terraform init -upgrade > /dev/null && terraform test
+	terraform init -upgrade > /dev/null && terraform test
 
 # Import existing query (usage: make import KEY=revenue_daily_totals ID=6612997)
 import: check-api-key
