@@ -29,7 +29,7 @@ run "basic_configuration" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       test_query = {
         name = "Test Query"
@@ -67,7 +67,7 @@ run "query_prefix" {
     team         = "test-team"
     dune_api_key = "test-api-key"
     query_prefix = "[Dashboard]"
-    
+
     queries = {
       revenue = {
         name = "Revenue Daily"
@@ -92,7 +92,7 @@ run "sql_hash_generation" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       query_a = {
         name = "Query A"
@@ -127,14 +127,14 @@ run "materialized_view_config" {
   variables {
     team         = "my-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       daily_stats = {
         name = "Daily Stats"
         sql  = "SELECT date, count(*) FROM events GROUP BY 1"
       }
     }
-    
+
     materialized_views = {
       result_daily_stats = {
         query_key   = "daily_stats"
@@ -161,14 +161,14 @@ run "default_performance" {
     team                = "test-team"
     dune_api_key        = "test-api-key"
     default_performance = "large"
-    
+
     queries = {
       heavy_query = {
         name = "Heavy Query"
         sql  = "SELECT * FROM large_table"
       }
     }
-    
+
     materialized_views = {
       result_heavy = {
         query_key = "heavy_query"
@@ -195,7 +195,7 @@ run "privacy_settings" {
     team         = "test-team"
     dune_api_key = "test-api-key"
     is_private   = true
-    
+
     queries = {
       private_query = {
         name = "Private Query"
@@ -205,7 +205,7 @@ run "privacy_settings" {
       public_query = {
         name    = "Public Query"
         sql     = "SELECT 1"
-        private = false  # Override to public
+        private = false # Override to public
       }
     }
   }
@@ -227,7 +227,7 @@ run "workspace_url_override" {
     team                 = "test-team"
     dune_api_key         = "test-api-key"
     workspace_folder_url = "https://custom.dune.com/workspace/special"
-    
+
     queries = {}
   }
 
@@ -248,7 +248,7 @@ run "multiple_queries" {
     dune_api_key = "test-api-key"
     query_prefix = "[Analytics]"
     query_folder = "Reports"
-    
+
     queries = {
       users = {
         name        = "Active Users"
@@ -301,7 +301,7 @@ run "sql_metadata_stripping" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       with_metadata = {
         name = "Query With Metadata"
@@ -338,7 +338,7 @@ run "api_base_url_override" {
     team         = "test-team"
     dune_api_key = "test-api-key"
     api_base_url = "https://custom-api.dune.com/api/v2"
-    
+
     queries = {}
   }
 
@@ -359,7 +359,7 @@ run "api_timeout_config" {
     team         = "test-team"
     dune_api_key = "test-api-key"
     api_timeout  = 60
-    
+
     queries = {}
   }
 
@@ -378,7 +378,7 @@ run "state_file_disabled_default" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       test = {
         name = "Test"
@@ -404,7 +404,7 @@ run "data_sources_disabled_default" {
     team         = "test-team"
     dune_api_key = "test-api-key"
     # All enable_* options default to false
-    
+
     queries = {}
   }
 

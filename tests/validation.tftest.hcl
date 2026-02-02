@@ -61,7 +61,7 @@ run "invalid_performance_rejected" {
   variables {
     team                = "test-team"
     dune_api_key        = "test-api-key"
-    default_performance = "super-fast"  # Invalid - must be "medium" or "large"
+    default_performance = "super-fast" # Invalid - must be "medium" or "large"
     queries             = {}
   }
 
@@ -79,7 +79,7 @@ run "query_without_sql_rejected" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       missing_sql = {
         name = "Missing SQL Query"
@@ -102,18 +102,18 @@ run "invalid_cron_rejected" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       test = {
         name = "Test"
         sql  = "SELECT 1"
       }
     }
-    
+
     materialized_views = {
       result_test = {
         query_key = "test"
-        cron      = "invalid-cron"  # Invalid cron expression
+        cron      = "invalid-cron" # Invalid cron expression
       }
     }
   }
@@ -132,7 +132,7 @@ run "valid_cron_accepted" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       hourly_query = {
         name = "Hourly"
@@ -147,19 +147,19 @@ run "valid_cron_accepted" {
         sql  = "SELECT 3"
       }
     }
-    
+
     materialized_views = {
       hourly_mv = {
         query_key = "hourly_query"
-        cron      = "0 */1 * * *"  # Every hour
+        cron      = "0 */1 * * *" # Every hour
       }
       daily_mv = {
         query_key = "daily_query"
-        cron      = "0 0 * * *"    # Daily at midnight
+        cron      = "0 0 * * *" # Daily at midnight
       }
       weekly_mv = {
         query_key = "weekly_query"
-        cron      = "0 0 * * 0"    # Weekly on Sunday
+        cron      = "0 0 * * 0" # Weekly on Sunday
       }
     }
   }
@@ -218,11 +218,11 @@ run "state_file_path_config" {
   command = plan
 
   variables {
-    team            = "test-team"
-    dune_api_key    = "test-api-key"
-    enable_state_file = false  # Don't actually create file
-    state_file_path = "custom/path/state.yaml"
-    
+    team              = "test-team"
+    dune_api_key      = "test-api-key"
+    enable_state_file = false # Don't actually create file
+    state_file_path   = "custom/path/state.yaml"
+
     queries = {}
   }
 
@@ -241,7 +241,7 @@ run "query_with_sql_file" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       file_query = {
         name     = "File Query"
@@ -270,7 +270,7 @@ run "query_sql_file_with_metadata" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       metadata_query = {
         name     = "Metadata Query"
@@ -301,7 +301,7 @@ run "sql_inline_precedence" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       precedence_query = {
         name     = "Precedence Query"
@@ -328,7 +328,7 @@ run "query_tags_accepted" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       tagged_query = {
         name        = "Tagged Query"

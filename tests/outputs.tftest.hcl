@@ -26,7 +26,7 @@ run "query_url_format" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       my_query = {
         name = "My Query"
@@ -51,14 +51,14 @@ run "matview_name_format" {
   variables {
     team         = "analytics-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       stats = {
         name = "Stats"
         sql  = "SELECT count(*) FROM events"
       }
     }
-    
+
     materialized_views = {
       result_stats = {
         query_key = "stats"
@@ -84,14 +84,14 @@ run "state_export_structure" {
     team         = "export-team"
     dune_api_key = "test-api-key"
     query_folder = "TestFolder"
-    
+
     queries = {
       export_query = {
         name = "Export Query"
         sql  = "SELECT * FROM test"
       }
     }
-    
+
     materialized_views = {
       result_export = {
         query_key   = "export_query"
@@ -166,9 +166,9 @@ run "empty_matviews" {
   command = plan
 
   variables {
-    team              = "test-team"
-    dune_api_key      = "test-api-key"
-    queries           = {}
+    team               = "test-team"
+    dune_api_key       = "test-api-key"
+    queries            = {}
     materialized_views = {}
   }
 
@@ -187,7 +187,7 @@ run "hash_consistency" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       query_1 = {
         name = "Query 1"
@@ -195,7 +195,7 @@ run "hash_consistency" {
       }
       query_2 = {
         name = "Query 2"
-        sql  = "SELECT id, name FROM users WHERE active = true"  # Same SQL
+        sql  = "SELECT id, name FROM users WHERE active = true" # Same SQL
       }
     }
   }
@@ -216,14 +216,14 @@ run "matview_query_ids_output" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       base_query = {
         name = "Base Query"
         sql  = "SELECT 1"
       }
     }
-    
+
     materialized_views = {
       result_base = {
         query_key = "base_query"
@@ -249,7 +249,7 @@ run "state_export_query_folder" {
     team         = "test-team"
     dune_api_key = "test-api-key"
     query_folder = "MyFolder"
-    
+
     queries = {
       test = {
         name = "Test"
@@ -274,14 +274,14 @@ run "state_export_matview_cron" {
   variables {
     team         = "test-team"
     dune_api_key = "test-api-key"
-    
+
     queries = {
       test = {
         name = "Test"
         sql  = "SELECT 1"
       }
     }
-    
+
     materialized_views = {
       result_test = {
         query_key = "test"
