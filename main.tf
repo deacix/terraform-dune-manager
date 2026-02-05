@@ -151,7 +151,9 @@ resource "null_resource" "materialized_views" {
         -d '{
           "name": "${each.key}",
           "query_id": '$QUERY_ID',
-          "cron": "${each.value.cron}"
+          "cron_expression": "${each.value.cron}",
+          "performance": "${local.mv_performance[each.key]}",
+          "is_private": true
         }' \
         "${var.api_base_url}/materialized-views")
       
@@ -280,4 +282,94 @@ resource "local_file" "state_yaml" {
     null_resource.queries,
     null_resource.materialized_views,
   ]
+}
+
+# -----------------------------------------------------------------------------
+# Materialized View Drift Detection
+# -----------------------------------------------------------------------------
+# Verifies that actual Dune mat view configuration matches Terraform state.
+# This runs during `terraform plan` to detect configuration drift.
+
+data "external" "verify_matview" {
+  for_each = var.materialized_views
+
+  program = ["bash", "${local.scripts_path}/verify_matview.sh"]
+
+  query = {
+    name             = "dune.${var.team}.${each.key}"
+    expected_cron    = each.value.cron
+    expected_query_id = tostring(coalesce(var.queries[each.value.query_key].query_id, 0))
+  }
+}
+
+# Output drift detection results for visibility
+output "matview_drift_status" {
+  description = "Drift detection status for each materialized view"
+  value = {
+    for k, v in data.external.verify_matview : k => {
+      status      = v.result.status
+      actual_cron = v.result.actual_cron
+      message     = v.result.message
+    }
+  }
+}
+
+# Check for any drift and output a warning
+output "has_matview_drift" {
+  description = "True if any materialized view has configuration drift"
+  value = anytrue([
+    for k, v in data.external.verify_matview : v.result.status == "drift" || v.result.status == "missing"
+  ])
+}
+
+# Resource to force re-apply when drift is detected
+resource "null_resource" "matview_drift_check" {
+  for_each = {
+    for k, v in data.external.verify_matview : k => v
+    if v.result.status == "drift" || v.result.status == "missing"
+  }
+
+  # Force recreation when drift is detected
+  triggers = {
+    drift_status = each.value.result.status
+    drift_message = each.value.result.message
+    timestamp = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "=========================================="
+      echo "DRIFT DETECTED: ${each.key}"
+      echo "Status: ${each.value.result.status}"
+      echo "Message: ${each.value.result.message}"
+      echo "Actual cron: ${each.value.result.actual_cron}"
+      echo "Expected cron: ${var.materialized_views[each.key].cron}"
+      echo "=========================================="
+      echo ""
+      echo "Re-applying materialized view configuration..."
+      
+      QUERY_ID="${null_resource.queries[var.materialized_views[each.key].query_key].triggers.query_id}"
+      
+      curl -s -X POST \
+        -H "X-Dune-API-Key: $DUNE_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "name": "${each.key}",
+          "query_id": '$QUERY_ID',
+          "cron_expression": "${var.materialized_views[each.key].cron}",
+          "performance": "${local.mv_performance[each.key]}",
+          "is_private": true
+        }' \
+        "${var.api_base_url}/materialized-views"
+      
+      echo ""
+      echo "Mat view ${each.key} configuration re-applied."
+    EOT
+
+    interpreter = ["/bin/bash", "-c"]
+
+    environment = {
+      DUNE_API_KEY = var.dune_api_key
+    }
+  }
 }

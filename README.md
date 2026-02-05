@@ -323,3 +323,51 @@ git push -u origin hotfix/critical-fix
 - [Simple Example](examples/simple/README.md)
 - [Dune API Reference](https://docs.dune.com/api-reference)
 - [Terraform Module Development](https://developer.hashicorp.com/terraform/language/modules/develop)
+
+## Drift Detection
+
+The module includes automatic drift detection for materialized views. During `terraform plan`, it checks if the actual Dune configuration matches the expected Terraform configuration.
+
+### What It Detects
+
+- **Missing cron schedule**: Mat view exists but has no cron_schedule configured
+- **Cron mismatch**: Mat view has a different cron_schedule than expected
+- **Query ID mismatch**: Mat view is linked to a different query than expected
+
+### How It Works
+
+1. During `terraform plan`, the `verify_matview.sh` script queries the Dune API for each mat view
+2. It compares actual values against expected Terraform configuration
+3. Results are shown in the `matview_drift_status` output
+4. If drift is detected, `terraform apply` will re-apply the correct configuration
+
+### Example Output
+
+```hcl
+# terraform plan output when drift is detected:
+matview_drift_status = {
+  "result_1inch_live_overview" = {
+    actual_cron = "null"
+    message     = "DRIFT: cron_schedule is null but expected '0 * * * *'"
+    status      = "drift"
+  }
+}
+has_matview_drift = true
+```
+
+### Fixing Drift
+
+Simply run `terraform apply` - the module will automatically re-apply the correct configuration to any mat views with drift.
+
+```bash
+terraform apply
+```
+
+### Manual Verification
+
+You can also run the verification script directly:
+
+```bash
+export DUNE_API_KEY="your-api-key"
+echo '{"name":"dune.your-team.your_matview","expected_cron":"0 * * * *","expected_query_id":"123456"}' | ./scripts/verify_matview.sh
+```
