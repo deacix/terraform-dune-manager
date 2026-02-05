@@ -6,10 +6,16 @@
 #
 # Usage: ./create_or_get_query.sh
 # Reads JSON input from stdin with: name, sql, is_private, query_id (optional)
-# If query_id is provided and not empty, returns it directly (no API call).
-# Otherwise, creates a new query and returns the new query_id.
 #
-# Environment: DUNE_API_KEY must be set (only needed for create)
+# Logic:
+# 1. If query_id is provided and valid, verify it exists and return it
+# 2. Otherwise, search for an existing query by exact name match
+# 3. If found (and not archived), return that ID
+# 4. If not found, create a new query
+#
+# This ensures query_ids remain STABLE and don't drift in terraform state.
+#
+# Environment: DUNE_API_KEY must be set
 
 set -e
 
@@ -23,13 +29,7 @@ IS_PRIVATE=$(echo "$INPUT" | jq -r '.is_private // "true"')
 EXISTING_ID=$(echo "$INPUT" | jq -r '.query_id // empty')
 API_URL="${DUNE_API_URL:-https://api.dune.com/api/v1}"
 
-# If existing query_id is provided, return it without API call
-if [ -n "$EXISTING_ID" ] && [ "$EXISTING_ID" != "null" ] && [ "$EXISTING_ID" != "0" ]; then
-    echo "{\"query_id\": \"$EXISTING_ID\", \"mode\": \"existing\"}"
-    exit 0
-fi
-
-# Need to create a new query - validate API key
+# Validate API key
 if [ -z "$DUNE_API_KEY" ]; then
     echo '{"error": "DUNE_API_KEY environment variable not set"}' >&2
     exit 1
@@ -45,7 +45,48 @@ if [ -z "$SQL" ] || [ "$SQL" = "null" ]; then
     exit 1
 fi
 
-# Create query via API
+# -----------------------------------------------------------------------------
+# Step 1: If existing query_id is provided, verify it exists and return it
+# -----------------------------------------------------------------------------
+if [ -n "$EXISTING_ID" ] && [ "$EXISTING_ID" != "null" ] && [ "$EXISTING_ID" != "0" ]; then
+    # Verify the query exists and is not archived
+    VERIFY_RESPONSE=$(curl -s \
+        -H "X-Dune-API-Key: $DUNE_API_KEY" \
+        "$API_URL/query/$EXISTING_ID" 2>/dev/null || echo '{}')
+    
+    VERIFIED_ID=$(echo "$VERIFY_RESPONSE" | jq -r '.query_id // empty')
+    IS_ARCHIVED=$(echo "$VERIFY_RESPONSE" | jq -r '.is_archived // false')
+    
+    if [ -n "$VERIFIED_ID" ] && [ "$IS_ARCHIVED" != "true" ]; then
+        echo "{\"query_id\": \"$EXISTING_ID\", \"mode\": \"existing\"}"
+        exit 0
+    fi
+    # If query doesn't exist or is archived, fall through to search/create
+fi
+
+# -----------------------------------------------------------------------------
+# Step 2: Search for existing query by name
+# -----------------------------------------------------------------------------
+# Use the /queries endpoint to list all queries owned by this API key
+# Then filter locally by exact name match
+
+SEARCH_RESPONSE=$(curl -s \
+    -H "X-Dune-API-Key: $DUNE_API_KEY" \
+    "$API_URL/queries?limit=1000" 2>/dev/null || echo '{"queries":[]}')
+
+# Find query with exact name match that is not archived
+# Note: API returns 'id' field, and list endpoint doesn't include is_archived status
+FOUND_ID=$(echo "$SEARCH_RESPONSE" | jq -r --arg name "$NAME" \
+    '.queries[]? | select(.name == $name) | .id' | head -1)
+
+if [ -n "$FOUND_ID" ] && [ "$FOUND_ID" != "null" ]; then
+    echo "{\"query_id\": \"$FOUND_ID\", \"mode\": \"found\"}"
+    exit 0
+fi
+
+# -----------------------------------------------------------------------------
+# Step 3: Create new query (no existing query found)
+# -----------------------------------------------------------------------------
 RESPONSE=$(curl -s -X POST \
     -H "X-Dune-API-Key: $DUNE_API_KEY" \
     -H "Content-Type: application/json" \
