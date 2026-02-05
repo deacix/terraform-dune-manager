@@ -156,8 +156,8 @@ resource "null_resource" "materialized_views" {
         -d '{
           "name": "${each.key}",
           "query_id": '$QUERY_ID',
-          "cron_schedule": "${each.value.cron}",
-          "execution_tier": "${local.mv_performance[each.key]}",
+          "cron_expression": "${each.value.cron}",
+          "performance": "${local.mv_performance[each.key]}",
           "is_private": true
         }' \
         "${var.api_base_url}/materialized-views")
@@ -361,8 +361,8 @@ resource "null_resource" "matview_drift_check" {
         -d '{
           "name": "${each.key}",
           "query_id": '$QUERY_ID',
-          "cron_schedule": "${var.materialized_views[each.key].cron}",
-          "execution_tier": "${local.mv_performance[each.key]}",
+          "cron_expression": "${var.materialized_views[each.key].cron}",
+          "performance": "${local.mv_performance[each.key]}",
           "is_private": true
         }' \
         "${var.api_base_url}/materialized-views"
