@@ -11,7 +11,14 @@ mock_provider "external" {
   mock_data "external" {
     defaults = {
       result = {
+        # For create_query
         query_id = "99999"
+        mode     = "existing"
+        # For verify_matview
+        status          = "skip"
+        actual_cron     = "unknown"
+        actual_query_id = "0"
+        message         = "Mock - DUNE_API_KEY not set"
       }
     }
   }
