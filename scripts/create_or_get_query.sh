@@ -49,7 +49,7 @@ fi
 # Step 1: If existing query_id is provided, verify it exists and return it
 # -----------------------------------------------------------------------------
 if [ -n "$EXISTING_ID" ] && [ "$EXISTING_ID" != "null" ] && [ "$EXISTING_ID" != "0" ]; then
-    # Verify the query exists and is not archived
+    # Verify the query exists
     VERIFY_RESPONSE=$(curl -s \
         -H "X-Dune-API-Key: $DUNE_API_KEY" \
         "$API_URL/query/$EXISTING_ID" 2>/dev/null || echo '{}')
@@ -57,11 +57,18 @@ if [ -n "$EXISTING_ID" ] && [ "$EXISTING_ID" != "null" ] && [ "$EXISTING_ID" != 
     VERIFIED_ID=$(echo "$VERIFY_RESPONSE" | jq -r '.query_id // empty')
     IS_ARCHIVED=$(echo "$VERIFY_RESPONSE" | jq -r '.is_archived // false')
     
-    if [ -n "$VERIFIED_ID" ] && [ "$IS_ARCHIVED" != "true" ]; then
+    if [ -n "$VERIFIED_ID" ]; then
+        # If query is archived, unarchive it first
+        if [ "$IS_ARCHIVED" = "true" ]; then
+            echo "Query $EXISTING_ID is archived, unarchiving..." >&2
+            curl -s -X POST \
+                -H "X-Dune-API-Key: $DUNE_API_KEY" \
+                "$API_URL/query/$EXISTING_ID/unarchive" > /dev/null || true
+        fi
         echo "{\"query_id\": \"$EXISTING_ID\", \"mode\": \"existing\"}"
         exit 0
     fi
-    # If query doesn't exist or is archived, fall through to search/create
+    # If query doesn't exist at all, fall through to search/create
 fi
 
 # -----------------------------------------------------------------------------

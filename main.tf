@@ -51,6 +51,8 @@ resource "null_resource" "queries" {
 
   # Update query when SQL changes
   # Note: Uses jq to safely construct JSON, avoiding shell escaping issues with SQL
+  # Also unarchives the query in case the destroy provisioner archived it during
+  # the destroy+create cycle (Terraform replaces null_resource as -/+ on trigger changes)
   provisioner "local-exec" {
     command = <<-EOT
       set -e
@@ -59,6 +61,13 @@ resource "null_resource" "queries" {
       
       if [ -n "$QUERY_ID" ] && [ "$QUERY_ID" != "0" ]; then
         echo "Updating query ${each.key} (ID: $QUERY_ID)..."
+        
+        # Unarchive first - the destroy provisioner may have archived this query
+        # during Terraform's destroy+create replacement cycle
+        echo "Unarchiving query $QUERY_ID (in case it was archived)..."
+        curl -s -X POST \
+          -H "X-Dune-API-Key: $DUNE_API_KEY" \
+          "${var.api_base_url}/query/$QUERY_ID/unarchive" > /dev/null || true
         
         # Use jq to safely construct JSON from environment variables
         # This avoids shell escaping issues with SQL containing special characters
