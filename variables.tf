@@ -89,7 +89,7 @@ variable "queries" {
     sql         = optional(string)
     tags        = optional(list(string), [])
     private     = optional(bool)
-    query_id    = optional(number)  # Existing query ID (if importing)
+    query_id    = optional(number) # Existing query ID (if importing)
   }))
 
   default = {}
@@ -191,6 +191,6 @@ variable "force_matview_sync" {
     cron_expression and performance are in sync with Terraform.
     Useful when someone may have changed settings in the Dune UI.
   EOT
-  type    = bool
-  default = false
+  type        = bool
+  default     = false
 }
